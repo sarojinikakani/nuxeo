@@ -22,7 +22,9 @@ import java.util.Map;
 import org.nuxeo.ecm.core.event.EventBundle;
 
 /**
- * @since TODO
+ * Provides partial default implementation for a {@link PipeConsumer}
+ *
+ * @since 8.4
  */
 public abstract class AbstractPipeConsumer<T> implements PipeConsumer<T> {
 
