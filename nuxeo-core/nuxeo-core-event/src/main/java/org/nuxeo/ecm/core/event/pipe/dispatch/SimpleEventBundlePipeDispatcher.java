@@ -1,30 +1,29 @@
 /*
- * (C) Copyright 2006-2016 Nuxeo SA (http://nuxeo.com/) and others.
+ * (C) Copyright 2016 Nuxeo SA (http://nuxeo.com/) and contributors.
  *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the GNU Lesser General Public License
+ * (LGPL) version 2.1 which accompanies this distribution, and is available at
+ * http://www.gnu.org/licenses/lgpl-2.1.html
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
  *
  * Contributors:
  *     tiry
  */
 package org.nuxeo.ecm.core.event.pipe.dispatch;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+
 import org.nuxeo.ecm.core.event.EventBundle;
 import org.nuxeo.ecm.core.event.pipe.EventBundlePipe;
 import org.nuxeo.ecm.core.event.pipe.EventPipeDescriptor;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Basic implementation that simply forwards {@link EventBundle} to all underlying {@link EventBundlePipe}
@@ -42,7 +41,13 @@ public class SimpleEventBundlePipeDispatcher implements EventBundleDispatcher {
 
         this.parameters = parameters;
 
-        pipeDescriptors.sort((o1, o2) -> o1.getPriority().compareTo(o2.getPriority()));
+        pipeDescriptors.sort(new Comparator<EventPipeDescriptor>() {
+            @Override
+            public int compare(EventPipeDescriptor o1, EventPipeDescriptor o2) {
+
+                return o1.getPriority().compareTo(o2.getPriority());
+            }
+        });
 
         for (EventPipeDescriptor descriptor : pipeDescriptors) {
             EventBundlePipe pipe = descriptor.getInstance();
@@ -53,7 +58,7 @@ public class SimpleEventBundlePipeDispatcher implements EventBundleDispatcher {
 
     @Override
     public void sendEventBundle(EventBundle events) {
-        if (events.isEmpty()) {
+        if (events.size() == 0) {
             return;
         }
         for (EventBundlePipe pipe : pipes) {
@@ -65,7 +70,7 @@ public class SimpleEventBundlePipeDispatcher implements EventBundleDispatcher {
     public boolean waitForCompletion(long timeoutMillis) throws InterruptedException {
         boolean res = true;
         for (EventBundlePipe pipe : pipes) {
-            res = pipe.waitForCompletion(timeoutMillis) && res;
+            res = res && pipe.waitForCompletion(timeoutMillis);
         }
         return res;
     }

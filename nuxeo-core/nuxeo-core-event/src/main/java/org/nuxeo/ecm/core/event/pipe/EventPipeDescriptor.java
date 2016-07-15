@@ -26,7 +26,9 @@ import org.nuxeo.common.xmap.annotation.XNodeMap;
 import org.nuxeo.common.xmap.annotation.XObject;
 
 /**
- * @since TODO
+ * XMap Descriptor for contributing a new {@link EventBundlePipe}
+ *
+ * @since 8.4
  */
 @XObject("eventPipe")
 public class EventPipeDescriptor {
@@ -74,5 +76,23 @@ public class EventPipeDescriptor {
         } catch (ReflectiveOperationException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void merge(EventPipeDescriptor other) {
+        if (other.priority!=null) {
+            priority = other.priority;
+        }
+        if (other.clazz!=null) {
+            clazz = other.clazz;
+        }
+        parameters.putAll(other.getParameters());
+    }
+
+    @Override
+    public EventPipeDescriptor clone() {
+        EventPipeDescriptor copy = new EventPipeDescriptor(name, clazz);
+        copy.priority=priority;
+        copy.parameters = parameters;
+        return copy;
     }
 }
