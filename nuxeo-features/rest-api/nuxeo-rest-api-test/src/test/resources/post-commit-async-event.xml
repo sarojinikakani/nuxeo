@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<component name="nico-contrib" version="1.0">
+  <extension target="org.nuxeo.ecm.core.event.EventServiceComponent" point="listener">
+    <listener name="postCommitEventTest" async="true" postCommit="true" class="org.nuxeo.ecm.restapi.test.AsyncPostCommitTestPostCommitListener"
+      priority="600">
+      <event>documentCreated</event>
+    </listener>
+  </extension>
+  <extension target="org.nuxeo.ecm.core.event.EventServiceComponent" point="listener">
+    <listener name="simpleEventTest" async="true" postCommit="true" class="org.nuxeo.ecm.restapi.test.AsyncPostCommitTestSimpleListener"
+      priority="600">
+      <event>documentCreated</event>
+    </listener>
+  </extension>
+</component>
