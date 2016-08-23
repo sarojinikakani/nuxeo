@@ -18,11 +18,17 @@
  */
 package org.nuxeo.ecm.restapi.server.jaxrs.directory;
 
+import java.util.List;
+
+import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 
+import org.nuxeo.ecm.directory.Directory;
+import org.nuxeo.ecm.directory.api.DirectoryService;
 import org.nuxeo.ecm.webengine.model.WebObject;
 import org.nuxeo.ecm.webengine.model.impl.DefaultObject;
+import org.nuxeo.runtime.api.Framework;
 
 /**
  * @since 5.7.8
@@ -33,5 +39,14 @@ public class DirectoryRootObject extends DefaultObject {
     @Path("{directoryName}")
     public Object doGetDirectory(@PathParam("directoryName") String dirName) {
         return newObject("directoryObject", dirName);
+    }
+    
+    /**
+     * @since 8.4
+     */
+    @GET
+    public List<Directory> getDirectoryNames() {
+        DirectoryService directoryService = Framework.getLocalService(DirectoryService.class);
+        return directoryService.getDirectories();
     }
 }

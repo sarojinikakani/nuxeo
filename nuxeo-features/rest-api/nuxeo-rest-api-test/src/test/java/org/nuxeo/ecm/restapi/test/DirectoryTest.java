@@ -46,6 +46,7 @@ import org.nuxeo.ecm.directory.api.DirectoryEntry;
 import org.nuxeo.ecm.directory.api.DirectoryService;
 import org.nuxeo.ecm.directory.io.DirectoryEntryJsonWriter;
 import org.nuxeo.ecm.directory.io.DirectoryEntryListJsonWriter;
+import org.nuxeo.ecm.directory.io.DirectoryListJsonWriter;
 import org.nuxeo.ecm.platform.usermanager.UserManager;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.runner.Features;
@@ -110,6 +111,15 @@ public class DirectoryTest extends BaseTest {
         assertEquals(docEntry.getPropertyValue("vocabulary:label"),
                 node.get("properties").get("label").getValueAsText());
 
+    }
+    
+    @Test
+    public void itCanQueryDirectoryNames() throws Exception {
+        // When I call the Rest endpoint
+        JsonNode node = getResponseAsJson(RequestType.GET, "/directory");
+
+        assertEquals(DirectoryListJsonWriter.ENTITY_TYPE, node.get("entity-type").getValueAsText());
+        assertEquals(3, node.get("entries").size());
     }
 
     @Test
