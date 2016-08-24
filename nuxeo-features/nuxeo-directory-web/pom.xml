@@ -16,6 +16,7 @@
   <modules>
     <module>nuxeo-platform-directory-web</module>
     <module>nuxeo-platform-directory-web-jsf</module>
+    <module>nuxeo-platform-directory-web-rest-api</module>
   </modules>
   
 

@@ -13,7 +13,8 @@ Bundle-Vendor: Nuxeo
 Bundle-Version: 5.3.2.SNAPSHOT
 Bnd-LastModified: 1277886815322
 Bundle-ManifestVersion: 2
-Nuxeo-Component: OSGI-INF/directory-ui-framework.xml
+Nuxeo-Component: OSGI-INF/directory-ui-framework.xml,
+ OSGI-INF/marshallers-contrib.xml
 Bundle-SymbolicName: org.nuxeo.ecm.directory.web;singleton:=true
 Import-Package: javax.annotation;version="1.0",
  javax.ejb,

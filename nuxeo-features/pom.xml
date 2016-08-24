@@ -39,7 +39,7 @@
     <module>nuxeo-platform-forms-layout-io-plugins</module>
     <module>nuxeo-platform-forms-layout-export</module>
     <module>localconf</module>
-    <module>nuxeo-platform-directory-web</module>
+    <module>nuxeo-directory-web</module>
     <module>nuxeo-platform-userpreferences</module>
     <module>nuxeo-platform-ui-select2</module>
     <module>nuxeo-thumbnail</module>
