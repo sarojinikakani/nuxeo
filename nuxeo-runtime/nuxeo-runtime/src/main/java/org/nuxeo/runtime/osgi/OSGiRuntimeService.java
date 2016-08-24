@@ -479,6 +479,10 @@ public class OSGiRuntimeService extends AbstractRuntimeService implements Framew
         }.processText(expression);
     }
 
+    /**
+     * @deprecated replaced by ComponentManager#start 
+     */
+    @Deprecated
     protected void notifyComponentsOnStarted() {
         List<RegistrationInfo> ris = new ArrayList<>(manager.getRegistrations());
         Collections.sort(ris, new RIApplicationStartedComparator());
@@ -491,6 +495,10 @@ public class OSGiRuntimeService extends AbstractRuntimeService implements Framew
         }
     }
 
+    /**
+     * @deprecated replaced by ComponentManager#start 
+     */
+    @Deprecated
     protected static class RIApplicationStartedComparator implements Comparator<RegistrationInfo> {
         @Override
         public int compare(RegistrationInfo r1, RegistrationInfo r2) {
@@ -520,7 +528,10 @@ public class OSGiRuntimeService extends AbstractRuntimeService implements Framew
         // requirement
         // on this marker component
         deployFrameworkStartedComponent();
-        notifyComponentsOnStarted();
+        // ============ activate and start components =======
+        //notifyComponentsOnStarted();
+        manager.start();
+        // ==================================================
         // print the startup message
         printStatusMessage();
     }
