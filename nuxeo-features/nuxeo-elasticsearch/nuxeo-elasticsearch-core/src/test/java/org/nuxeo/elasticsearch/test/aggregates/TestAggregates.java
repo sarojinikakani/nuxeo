@@ -21,6 +21,7 @@ package org.nuxeo.elasticsearch.test.aggregates;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -53,6 +54,7 @@ import org.nuxeo.ecm.platform.query.core.AggregateRangeDescriptor;
 import org.nuxeo.ecm.platform.query.core.BucketRangeDate;
 import org.nuxeo.ecm.platform.query.core.FieldDescriptor;
 import org.nuxeo.elasticsearch.aggregate.AggregateFactory;
+import org.nuxeo.elasticsearch.aggregate.DateHistogramAggregate;
 import org.nuxeo.elasticsearch.api.ElasticSearchAdmin;
 import org.nuxeo.elasticsearch.api.ElasticSearchIndexing;
 import org.nuxeo.elasticsearch.api.ElasticSearchService;
@@ -397,10 +399,13 @@ public class TestAggregates {
         aggDef.setDocumentField("dc:created");
         aggDef.setSearchField(new FieldDescriptor("advanced_search", "created_agg"));
         aggDef.setProperty("interval", "month");
+        aggDef.setProperty("format", "yyy-MM");
+        aggDef.setProperty("timeZone", "UTC");
         aggDef.setProperty("order", "count desc");
         aggDef.setProperty("minDocCounts", "5");
-        NxQueryBuilder qb = new NxQueryBuilder(session).nxql("SELECT * FROM Document").addAggregate(
-                AggregateFactory.create(aggDef, null));
+        DateHistogramAggregate agg = (DateHistogramAggregate) AggregateFactory.create(aggDef, null);
+        agg.setSelection(Arrays.asList("2016-08"));
+        NxQueryBuilder qb = new NxQueryBuilder(session).nxql("SELECT * FROM Document").addAggregate(agg);
         SearchRequestBuilder request = esa.getClient().prepareSearch(IDX_NAME).setTypes(TYPE_NAME);
         qb.updateRequest(request);
 
@@ -409,6 +414,24 @@ public class TestAggregates {
                 + "  \"size\" : 10,\n" //
                 + "  \"query\" : {\n" //
                 + "    \"match_all\" : { }\n" //
+                + "  },\n" //
+                + "  \"post_filter\" : {\n" //
+                + "    \"and\" : {\n" //
+                + "      \"filters\" : [ {\n" //
+                + "        \"or\" : {\n" //
+                + "          \"filters\" : [ {\n" //
+                + "            \"range\" : {\n" //
+                + "              \"dc:created\" : {\n" //
+                + "                \"from\" : 1470009600000,\n" //
+                + "                \"to\" : 1472688000000,\n" // this is 2016-09-01
+                + "                \"include_lower\" : true,\n" //
+                + "                \"include_upper\" : false\n" //
+                + "              }\n" //
+                + "            }\n" //
+                + "          } ]\n" //
+                + "        }\n" //
+                + "      } ]\n" //
+                + "    }\n" //
                 + "  },\n" //
                 + "  \"fields\" : \"_id\",\n" //
                 + "  \"aggregations\" : {\n" //
@@ -423,7 +446,9 @@ public class TestAggregates {
                 + "            \"interval\" : \"month\",\n" //
                 + "            \"order\" : {\n" //
                 + "              \"_count\" : \"desc\"\n" //
-                + "            }\n" //
+                + "            },\n" //
+                + "            \"pre_zone\" : \"UTC\",\n" //
+                + "            \"format\" : \"yyy-MM\"\n" //
                 + "          }\n" //
                 + "        }\n" //
                 + "      }\n" //
