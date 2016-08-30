@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- * 
+ *
  * Contributors:
  *     Nuxeo - initial API and implementation
  *
@@ -26,7 +26,6 @@ import static org.junit.Assert.assertEquals;
 import java.io.InputStream;
 import java.net.URL;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.runtime.api.Framework;
@@ -38,9 +37,8 @@ import org.nuxeo.runtime.test.NXRuntimeTestCase;
  */
 public class ResourceServiceTest extends NXRuntimeTestCase {
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    @Override
+    protected void setUp() throws Exception {
         deployContrib("org.nuxeo.runtime.test.tests", "ResourcesContrib.xml");
     }
 

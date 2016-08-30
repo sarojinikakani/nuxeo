@@ -26,7 +26,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.model.ComponentInstance;
@@ -40,9 +39,7 @@ import org.nuxeo.runtime.test.NXRuntimeTestCase;
 public class ComponentDeploymentTest extends NXRuntimeTestCase {
 
     @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp() throws Exception {
         deployContrib("org.nuxeo.runtime.test.tests", "MyComp1.xml");
         deployContrib("org.nuxeo.runtime.test.tests", "MyComp2.xml");
     }
