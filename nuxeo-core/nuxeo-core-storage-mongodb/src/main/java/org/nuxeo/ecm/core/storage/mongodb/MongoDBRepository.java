@@ -934,9 +934,12 @@ public class MongoDBRepository extends DBSRepositoryBase {
                     DBObject ob = cursorResult.cursor.next();
                     String id;
                     if (useCustomId) {
-                        id = (String) ob.get(ECM_UUID);
+                        id = (String) ob.get(KEY_ID);
                     } else {
                         id = (String) ob.get(MONGODB_ID);
+                    }
+                    if (id == null) {
+                        log.error("Got a document without id: " + ((BasicDBObject) ob).toString());
                     }
                     ids.add(id);
                 }
