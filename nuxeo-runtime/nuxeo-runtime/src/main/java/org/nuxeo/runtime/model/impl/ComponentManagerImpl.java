@@ -431,7 +431,7 @@ public class ComponentManagerImpl implements ComponentManager {
     		for (int i=list.size()-1;i>=0;i--) {
     			RegistrationInfoImpl ri = list.get(i);
     			if (ri.isStarted()) {
-    				list.get(i).stop();
+    				ri.stop();
     			}
     		}
 
