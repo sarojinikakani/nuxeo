@@ -28,8 +28,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.nuxeo.runtime.RuntimeServiceEvent;
-import org.nuxeo.runtime.RuntimeServiceListener;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.model.ComponentContext;
 import org.nuxeo.runtime.model.ComponentInstance;
@@ -81,7 +79,7 @@ public class CacheServiceImpl extends DefaultComponent implements CacheService {
 
     @Override
     public int getApplicationStartedOrder() {
-        ComponentInstance repositoryComponent = (ComponentInstance) Framework.getRuntime().getComponentInstance(
+        ComponentInstance repositoryComponent = Framework.getRuntime().getComponentInstance(
                 "org.nuxeo.ecm.core.repository.RepositoryServiceComponent");
         if (repositoryComponent == null) {
             return super.getApplicationStartedOrder();
@@ -90,19 +88,13 @@ public class CacheServiceImpl extends DefaultComponent implements CacheService {
     }
 
     @Override
-    public void applicationStarted(ComponentContext context) {
-        Framework.addListener(new RuntimeServiceListener() {
-
-            @Override
-            public void handleEvent(RuntimeServiceEvent event) {
-                if (RuntimeServiceEvent.RUNTIME_ABOUT_TO_START != event.id) {
-                    return;
-                }
-                Framework.removeListener(this);
-                cacheRegistry.stop();
-            }
-        });
+    public void start(ComponentContext context) {
         cacheRegistry.start();
+    }
+
+    @Override
+    public void stop(ComponentContext context) {
+        cacheRegistry.stop();
     }
 
     @Override
