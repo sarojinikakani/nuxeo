@@ -21,13 +21,16 @@
 
 package org.nuxeo.ecm.core.schema.types;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.util.Calendar;
 import java.util.Date;
 
-import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-
 import org.nuxeo.ecm.core.schema.Namespace;
 import org.nuxeo.ecm.core.schema.SchemaManager;
 import org.nuxeo.ecm.core.schema.SchemaNames;
@@ -43,9 +46,7 @@ import org.nuxeo.runtime.test.NXRuntimeTestCase;
 public class TestTypes extends NXRuntimeTestCase {
 
     @Override
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
+    protected void setUp() throws Exception {
         deployBundle("org.nuxeo.ecm.core.schema");
     }
 
@@ -288,6 +289,8 @@ public class TestTypes extends NXRuntimeTestCase {
     @Test
     public void testFieldFromXpath() throws Exception {
         deployTestContrib("org.nuxeo.ecm.core.schema", "OSGI-INF/test-advanced-schema.xml");
+        applyInlineDeployments();
+
         SchemaManager sm = Framework.getService(SchemaManager.class);
         assertNotNull(sm);
         Field field = sm.getField("tp:foo");
@@ -351,6 +354,8 @@ public class TestTypes extends NXRuntimeTestCase {
     @Test
     public void testSchemaFromType() throws Exception {
         deployTestContrib("org.nuxeo.ecm.core.schema", "OSGI-INF/test-advanced-schema.xml");
+        applyInlineDeployments();
+
         Schema schema = getSchema("foo");
         assertNull(schema);
         schema = getSchema("dc:title");
