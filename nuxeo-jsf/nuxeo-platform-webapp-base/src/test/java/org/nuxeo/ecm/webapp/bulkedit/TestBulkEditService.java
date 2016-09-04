@@ -24,7 +24,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +42,7 @@ import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
-import org.nuxeo.runtime.test.runner.RuntimeHarness;
+import org.nuxeo.runtime.test.runner.HotDeployer;
 
 /**
  * @since 5.7.3
@@ -58,7 +57,7 @@ public class TestBulkEditService {
     protected CoreSession session;
 
     @Inject
-    protected RuntimeHarness runtimeHarness;
+    protected HotDeployer deployer;
 
     @Inject
     protected EventService eventService;
@@ -134,8 +133,7 @@ public class TestBulkEditService {
 
     @Test
     public void testBulkEditNoVersion() throws Exception {
-        URL url = getClass().getClassLoader().getResource("test-bulkedit-noversion-contrib.xml");
-        runtimeHarness.deployTestContrib("org.nuxeo.ecm.webapp.base", url);
+        deployer.deploy("@org.nuxeo.ecm.webapp.base:test-bulkedit-noversion-contrib.xml");
 
         List<DocumentModel> docs = createTestDocuments();
         DocumentModel sourceDoc = buildSimpleDocumentModel();
@@ -157,8 +155,7 @@ public class TestBulkEditService {
 
     @Test
     public void testBulkEditMajorVersion() throws Exception {
-        URL url = getClass().getClassLoader().getResource("test-bulkedit-majorversion-contrib.xml");
-        runtimeHarness.deployTestContrib("org.nuxeo.ecm.webapp.base", url);
+        deployer.deploy("@org.nuxeo.ecm.webapp.base:test-bulkedit-majorversion-contrib.xml");
 
         List<DocumentModel> docs = createTestDocuments();
         DocumentModel sourceDoc = buildSimpleDocumentModel();
