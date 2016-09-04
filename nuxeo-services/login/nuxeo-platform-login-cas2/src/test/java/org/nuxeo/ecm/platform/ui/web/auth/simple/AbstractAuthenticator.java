@@ -59,7 +59,6 @@ public abstract class AbstractAuthenticator extends NXRuntimeTestCase {
 
     @Override
     public void setUp() throws Exception {
-        super.setUp();
         initStandardPlugins();
     }
 

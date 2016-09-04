@@ -20,8 +20,15 @@
 
 package org.nuxeo.ecm.platform.convert.tests;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
 import org.junit.Assume;
-import org.junit.Before;
 import org.junit.Test;
 import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.ecm.core.api.Blob;
@@ -35,20 +42,11 @@ import org.nuxeo.ecm.platform.commandline.executor.api.CommandLineExecutorServic
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
 public class TestPDFToText extends NXRuntimeTestCase {
 
     protected ConversionService cs;
 
     @Override
-    @Before
     public void setUp() throws Exception {
         super.setUp();
         deployBundle("org.nuxeo.ecm.core.api");
@@ -56,6 +54,10 @@ public class TestPDFToText extends NXRuntimeTestCase {
         deployBundle("org.nuxeo.ecm.core.convert");
         deployBundle("org.nuxeo.ecm.platform.commandline.executor");
         deployBundle("org.nuxeo.ecm.platform.convert");
+    }
+
+    @Override
+    protected void postSetUp() throws Exception {
         cs = Framework.getLocalService(ConversionService.class);
         assertNotNull(cs);
     }

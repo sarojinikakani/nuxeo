@@ -26,10 +26,7 @@ import static org.junit.Assert.assertNotNull;
 import java.io.FileInputStream;
 
 import org.artofsolving.jodconverter.OfficeDocumentConverter;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-
 import org.nuxeo.ecm.platform.convert.ooomanager.OOoManagerComponent;
 import org.nuxeo.ecm.platform.convert.ooomanager.OOoManagerDescriptor;
 import org.nuxeo.ecm.platform.convert.ooomanager.OOoManagerService;
@@ -41,16 +38,13 @@ public class TestOOoServiceManagerService extends NXRuntimeTestCase {
     OOoManagerService ods;
 
     @Override
-    @Before
     public void setUp() throws Exception {
-        super.setUp();
         deployBundle("org.nuxeo.ecm.platform.convert");
         deployBundle("org.nuxeo.ecm.platform.convert.test");
         deployContrib("org.nuxeo.ecm.platform.convert.test", "test-ooo-manager-contrib.xml");
     }
 
     @Override
-    @After
     public void tearDown() throws Exception {
         ods.stopOOoManager();
         super.tearDown();

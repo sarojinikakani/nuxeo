@@ -29,9 +29,7 @@ import java.io.IOException;
 import java.util.List;
 
 import org.junit.Assume;
-import org.junit.Before;
 import org.junit.Test;
-
 import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.Blobs;
@@ -49,15 +47,16 @@ public class TestPDFToHtml extends NXRuntimeTestCase {
     protected ConversionService cs;
 
     @Override
-    @Before
     public void setUp() throws Exception {
-        super.setUp();
         deployBundle("org.nuxeo.ecm.core.api");
         deployBundle("org.nuxeo.ecm.core.convert.api");
         deployBundle("org.nuxeo.ecm.core.convert");
         deployBundle("org.nuxeo.ecm.platform.commandline.executor");
         deployBundle("org.nuxeo.ecm.platform.convert");
+    }
 
+    @Override
+    protected void postSetUp() throws Exception {
         cs = Framework.getLocalService(ConversionService.class);
         assertNotNull(cs);
     }
@@ -104,12 +103,12 @@ public class TestPDFToHtml extends NXRuntimeTestCase {
 
         String htmlContent = mainBlob.getString();
         assertTrue(htmlContent.contains("Hello"));
-        
+
         pdfBH = getBlobFromPath("test-docs/test-copy-text-restricted.pdf");
 
         result = cs.convert(converterName, pdfBH, null);
         assertNotNull(result);
-        
+
         blobs = result.getBlobs();
         assertNotNull(blobs);
         assertEquals(10, blobs.size());

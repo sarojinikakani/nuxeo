@@ -32,9 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.Assume;
-import org.junit.Before;
 import org.junit.Test;
-
 import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.Blobs;
@@ -52,15 +50,16 @@ public class TestPDFToImage extends NXRuntimeTestCase {
     protected ConversionService cs;
 
     @Override
-    @Before
     public void setUp() throws Exception {
-        super.setUp();
         deployBundle("org.nuxeo.ecm.core.api");
         deployBundle("org.nuxeo.ecm.core.convert.api");
         deployBundle("org.nuxeo.ecm.core.convert");
         deployBundle("org.nuxeo.ecm.platform.commandline.executor");
         deployBundle("org.nuxeo.ecm.platform.convert");
+    }
 
+    @Override
+    protected void postSetUp() throws Exception {
         cs = Framework.getLocalService(ConversionService.class);
         assertNotNull(cs);
     }
