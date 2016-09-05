@@ -54,9 +54,9 @@ import org.nuxeo.runtime.model.URLStreamRef;
 import org.nuxeo.runtime.reload.ReloadService;
 import org.nuxeo.runtime.test.runner.Defaults;
 import org.nuxeo.runtime.test.runner.Deploy;
-import org.nuxeo.runtime.test.runner.HotDeployer;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.test.runner.HotDeployer;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
 import org.nuxeo.runtime.test.runner.RuntimeFeature;
 import org.nuxeo.runtime.test.runner.RuntimeHarness;
@@ -229,7 +229,7 @@ public class CoreFeature extends SimpleFeature {
         }
     }
 
-    protected void waitForAsyncCompletion() {
+    public void waitForAsyncCompletion() {
         txFeature.nextTransaction();
     }
 
