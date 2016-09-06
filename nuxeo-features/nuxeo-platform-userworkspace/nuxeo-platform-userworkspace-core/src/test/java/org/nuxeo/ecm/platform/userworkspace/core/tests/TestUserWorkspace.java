@@ -50,7 +50,7 @@ import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
-import org.nuxeo.runtime.test.runner.RuntimeHarness;
+import org.nuxeo.runtime.test.runner.LocalDeploy;
 
 @RunWith(FeaturesRunner.class)
 @Features(PlatformFeature.class)
@@ -60,9 +60,6 @@ import org.nuxeo.runtime.test.runner.RuntimeHarness;
         "org.nuxeo.ecm.platform.userworkspace.core", //
 })
 public class TestUserWorkspace {
-
-    @Inject
-    protected RuntimeHarness harness;
 
     @Inject
     protected CoreFeature coreFeature;
@@ -146,16 +143,9 @@ public class TestUserWorkspace {
     }
 
     @Test
-    // @LocalDeploy("org.nuxeo.ecm.platform.userworkspace.core:OSGI-INF/compatUserWorkspaceImpl.xml")
+    @LocalDeploy("org.nuxeo.ecm.platform.userworkspace.core:OSGI-INF/compatUserWorkspaceImpl.xml")
     public void testMultiDomainsCompat() throws Exception {
-        harness.deployContrib("org.nuxeo.ecm.platform.userworkspace.core", "OSGI-INF/compatUserWorkspaceImpl.xml");
-        uwm = Framework.getService(UserWorkspaceService.class); // re-compute
-        try {
-            doTestMultiDomainsCompat();
-        } finally {
-            harness.undeployContrib("org.nuxeo.ecm.platform.userworkspace.core", "OSGI-INF/compatUserWorkspaceImpl.xml");
-            uwm = Framework.getService(UserWorkspaceService.class); // re-compute
-        }
+        doTestMultiDomainsCompat();
     }
 
     protected void doTestMultiDomainsCompat() throws Exception {

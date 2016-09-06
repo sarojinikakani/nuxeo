@@ -37,8 +37,8 @@ import org.nuxeo.ecm.platform.rendition.service.RenditionService;
 import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
+import org.nuxeo.runtime.test.runner.HotDeployer;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
-import org.nuxeo.runtime.test.runner.RuntimeHarness;
 
 import com.google.inject.Inject;
 
@@ -67,7 +67,7 @@ public class TestPictureRenditions {
     protected RenditionService renditionService;
 
     @Inject
-    protected RuntimeHarness runtimeHarness;
+    protected HotDeployer deployer;
 
     @Test
     public void shouldExposeAllPictureViewsAsRenditions() throws IOException {
@@ -95,8 +95,7 @@ public class TestPictureRenditions {
         List<RenditionDefinition> availableRenditionDefinitions = renditionService.getAvailableRenditionDefinitions(doc);
         assertEquals(6, availableRenditionDefinitions.size());
 
-        runtimeHarness.deployContrib("org.nuxeo.ecm.platform.picture.core",
-                "OSGI-INF/imaging-picture-renditions-override.xml");
+        deployer.deploy("org.nuxeo.ecm.platform.picture.core:OSGI-INF/imaging-picture-renditions-override.xml");
 
         availableRenditionDefinitions = renditionService.getAvailableRenditionDefinitions(doc);
         assertEquals(4, availableRenditionDefinitions.size());
@@ -109,7 +108,5 @@ public class TestPictureRenditions {
         availableRenditions = renditionService.getAvailableRenditions(doc, true);
         assertEquals(3, availableRenditions.size());
 
-        runtimeHarness.undeployContrib("org.nuxeo.ecm.platform.picture.core",
-                "OSGI-INF/imaging-picture-renditions-override.xml");
     }
 }

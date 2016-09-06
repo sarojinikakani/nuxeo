@@ -21,6 +21,15 @@
 
 package org.nuxeo.ecm.platform.relations.jena;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotSame;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -34,10 +43,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-
 import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.ecm.platform.relations.api.Graph;
 import org.nuxeo.ecm.platform.relations.api.Node;
@@ -74,15 +80,17 @@ public class TestJenaGraph extends NXRuntimeTestCase {
     private QNameResource references;
 
     @Override
-    @Before
     public void setUp() throws Exception {
-        super.setUp();
         deployBundle("org.nuxeo.runtime.management");
         deployBundle("org.nuxeo.ecm.core.schema");
         deployBundle("org.nuxeo.ecm.core.api");
         deployBundle("org.nuxeo.ecm.relations");
         deployBundle("org.nuxeo.ecm.relations.jena");
         deployContrib("org.nuxeo.ecm.relations.jena.tests", "jena-test-bundle.xml");
+    }
+
+    @Override
+    protected void postSetUp() throws Exception {
         RelationManager service = Framework.getService(RelationManager.class);
         Graph graph = service.getGraphByName("myrelations");
         assertNotNull(graph);
