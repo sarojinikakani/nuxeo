@@ -21,6 +21,12 @@
 
 package org.nuxeo.ecm.platform.usermanager;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,10 +34,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-
 import org.nuxeo.ecm.platform.usermanager.UserManager.MatchType;
 import org.nuxeo.runtime.api.Framework;
 import org.nuxeo.runtime.test.NXRuntimeTestCase;
@@ -43,11 +46,15 @@ public class TestUserService extends NXRuntimeTestCase {
 
     UserManager userManager;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
-        super.setUp();
         deployContrib("org.nuxeo.ecm.platform.usermanager", "OSGI-INF/UserService.xml");
         deployContrib("org.nuxeo.ecm.platform.usermanager.tests", "test-userservice-config.xml");
+        userManager = Framework.getService(UserManager.class);
+    }
+
+    @Override
+    protected void postSetUp() throws Exception {
         userManager = Framework.getService(UserManager.class);
     }
 
@@ -124,7 +131,8 @@ public class TestUserService extends NXRuntimeTestCase {
     @Test
     public void testOverride() throws Exception {
         deployContrib("org.nuxeo.ecm.platform.usermanager.tests", "test-userservice-override-config.xml");
-        userManager = Framework.getService(UserManager.class);
+        applyInlineDeployments();
+        postSetUp();
         FakeUserManagerImpl fum = (FakeUserManagerImpl) userManager;
         assertEquals(Arrays.asList("tehroot", "bob", "bobette"), fum.defaultAdministratorIds);
         assertEquals(Arrays.asList("myAdministrators"), fum.administratorsGroups);
@@ -161,7 +169,8 @@ public class TestUserService extends NXRuntimeTestCase {
         FakeUserManagerImpl fum = (FakeUserManagerImpl) userManager;
         assertTrue(fum.validatePassword(""));
         deployContrib("org.nuxeo.ecm.platform.usermanager.tests", "test-userservice-override-config.xml");
-        userManager = Framework.getService(UserManager.class);
+        applyInlineDeployments();
+        postSetUp();
         fum = (FakeUserManagerImpl) userManager;
         assertFalse(fum.validatePassword(""));
         assertFalse(fum.validatePassword("azerty"));
