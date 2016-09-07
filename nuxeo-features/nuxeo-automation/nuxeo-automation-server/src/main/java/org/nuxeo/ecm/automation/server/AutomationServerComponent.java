@@ -118,11 +118,6 @@ public class AutomationServerComponent extends DefaultComponent implements Autom
         return null;
     }
 
-    @Override
-    public void applicationStarted(ComponentContext context) {
-        super.applicationStarted(context);
-    }
-
     /**
      * Since 5.7.3, use {@link JsonFactoryManager#getJsonFactory()}
      */

@@ -93,11 +93,6 @@ public class AutomationScriptingComponent extends DefaultComponent {
     }
 
     @Override
-    public void applicationStarted(ComponentContext context) {
-        super.applicationStarted(context);
-    }
-
-    @Override
     public <T> T getAdapter(Class<T> adapter) {
         if (adapter.isAssignableFrom(AutomationScriptingService.class)) {
             return adapter.cast(scriptingService);
