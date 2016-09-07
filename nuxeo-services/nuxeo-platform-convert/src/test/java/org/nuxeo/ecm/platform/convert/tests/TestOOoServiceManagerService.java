@@ -26,6 +26,7 @@ import static org.junit.Assert.assertNotNull;
 import java.io.FileInputStream;
 
 import org.artofsolving.jodconverter.OfficeDocumentConverter;
+import org.junit.Assert;
 import org.junit.Test;
 import org.nuxeo.ecm.platform.convert.ooomanager.OOoManagerComponent;
 import org.nuxeo.ecm.platform.convert.ooomanager.OOoManagerDescriptor;
@@ -45,17 +46,17 @@ public class TestOOoServiceManagerService extends NXRuntimeTestCase {
     }
 
     @Override
-    public void tearDown() throws Exception {
-        ods.stopOOoManager();
-        super.tearDown();
+    protected void postSetUp() throws Exception {
+        ods = Framework.getLocalService(OOoManagerService.class);
     }
 
     @Test
     public void testServiceRegistration() throws Exception {
-        ods = Framework.getLocalService(OOoManagerService.class);
         assertNotNull(ods);
 
-        ods.startOOoManager();
+        // wait until OOo server is alive
+        Assert.assertTrue(ods.isAlive());
+
         OfficeDocumentConverter converter = ods.getDocumentConverter();
         assertNotNull(converter);
 
@@ -75,10 +76,11 @@ public class TestOOoServiceManagerService extends NXRuntimeTestCase {
     @Test
     public void testSocketConnection() throws Exception {
         Framework.getProperties().load(new FileInputStream(getResource("jodSocket.properties").getFile()));
-        ods = Framework.getLocalService(OOoManagerService.class);
         assertNotNull(ods);
 
-        ods.startOOoManager();
+        // wait until OOo server is alive
+        Assert.assertTrue(ods.isAlive());
+
         OfficeDocumentConverter converter = ods.getDocumentConverter();
         assertNotNull(converter);
     }
@@ -86,10 +88,11 @@ public class TestOOoServiceManagerService extends NXRuntimeTestCase {
     @Test
     public void testPipeConnection() throws Exception {
         Framework.getProperties().load(new FileInputStream(getResource("jodPipe.properties").getFile()));
-        ods = Framework.getLocalService(OOoManagerService.class);
         assertNotNull(ods);
 
-        ods.startOOoManager();
+        // wait until OOo server is alive
+        Assert.assertTrue(ods.isAlive());
+
         OfficeDocumentConverter converter = ods.getDocumentConverter();
         assertNotNull(converter);
     }
