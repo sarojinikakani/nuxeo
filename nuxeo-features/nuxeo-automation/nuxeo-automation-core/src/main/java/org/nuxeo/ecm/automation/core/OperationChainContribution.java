@@ -20,6 +20,24 @@
  */
 package org.nuxeo.ecm.automation.core;
 
+import static org.nuxeo.ecm.automation.core.Constants.T_BOOLEAN;
+import static org.nuxeo.ecm.automation.core.Constants.T_DATE;
+import static org.nuxeo.ecm.automation.core.Constants.T_DOCUMENT;
+import static org.nuxeo.ecm.automation.core.Constants.T_DOCUMENTS;
+import static org.nuxeo.ecm.automation.core.Constants.T_FLOAT;
+import static org.nuxeo.ecm.automation.core.Constants.T_INTEGER;
+import static org.nuxeo.ecm.automation.core.Constants.T_LONG;
+import static org.nuxeo.ecm.automation.core.Constants.T_PROPERTIES;
+import static org.nuxeo.ecm.automation.core.Constants.T_RESOURCE;
+import static org.nuxeo.ecm.automation.core.Constants.T_STRING;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.commons.lang.StringEscapeUtils;
 import org.nuxeo.common.utils.StringUtils;
 import org.nuxeo.common.xmap.annotation.XContent;
@@ -37,24 +55,6 @@ import org.nuxeo.ecm.automation.core.util.Properties;
 import org.nuxeo.ecm.core.api.impl.DocumentRefListImpl;
 import org.nuxeo.ecm.core.schema.utils.DateParser;
 import org.osgi.framework.Bundle;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.nuxeo.ecm.automation.core.Constants.T_BOOLEAN;
-import static org.nuxeo.ecm.automation.core.Constants.T_DATE;
-import static org.nuxeo.ecm.automation.core.Constants.T_DOCUMENT;
-import static org.nuxeo.ecm.automation.core.Constants.T_DOCUMENTS;
-import static org.nuxeo.ecm.automation.core.Constants.T_FLOAT;
-import static org.nuxeo.ecm.automation.core.Constants.T_INTEGER;
-import static org.nuxeo.ecm.automation.core.Constants.T_LONG;
-import static org.nuxeo.ecm.automation.core.Constants.T_PROPERTIES;
-import static org.nuxeo.ecm.automation.core.Constants.T_RESOURCE;
-import static org.nuxeo.ecm.automation.core.Constants.T_STRING;
 
 /**
  * @author <a href="mailto:bs@nuxeo.com">Bogdan Stefanescu</a>
@@ -159,11 +159,11 @@ public class OperationChainContribution {
                 // decode XML entities in every case
                 param.value = StringEscapeUtils.unescapeXml(param.value);
                 if (param.value.startsWith("expr:")) {
-                    param.value = param.value.substring(5);
-                    if (param.value.contains("@{")) {
-                        params.set(param.name, Scripting.newTemplate(param.value));
+                    String value = param.value.substring(5);
+                    if (value.contains("@{")) {
+                        params.set(param.name, Scripting.newTemplate(value));
                     } else {
-                        params.set(param.name, Scripting.newExpression(param.value));
+                        params.set(param.name, Scripting.newExpression(value));
                     }
                 } else {
                     Object val = null;
