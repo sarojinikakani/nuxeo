@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.nuxeo.common.utils.StringUtils;
-import org.nuxeo.ecm.core.api.NuxeoException;
 import org.nuxeo.ecm.core.storage.FulltextQueryAnalyzer;
 import org.nuxeo.ecm.core.storage.FulltextQueryAnalyzer.FulltextQuery;
 import org.nuxeo.ecm.core.storage.FulltextQueryAnalyzer.Op;
@@ -494,6 +493,11 @@ public class DialectMySQL extends Dialect {
     @Override
     public String getSQLForDump(String sql) {
         return sql + " $$";
+    }
+
+    @Override
+    public boolean supportsScroll() {
+        return false;
     }
 
 }
