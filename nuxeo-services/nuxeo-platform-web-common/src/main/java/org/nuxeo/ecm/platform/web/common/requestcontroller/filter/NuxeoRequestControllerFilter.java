@@ -310,9 +310,9 @@ public class NuxeoRequestControllerFilter implements Filter {
      */
     public static void addCacheHeader(HttpServletResponse httpResponse, Boolean isPrivate, String cacheTime) {
         if (isPrivate) {
-            httpResponse.setHeader("Cache-Control", "private, max-age=" + cacheTime);
+            httpResponse.addHeader("Cache-Control", "private, max-age=" + cacheTime);
         } else {
-            httpResponse.setHeader("Cache-Control", "public, max-age=" + cacheTime);
+            httpResponse.addHeader("Cache-Control", "public, max-age=" + cacheTime);
         }
         // Generating expires using current date and adding cache time.
         // we are using the format Expires: Thu, 01 Dec 1994 16:00:00 GMT
