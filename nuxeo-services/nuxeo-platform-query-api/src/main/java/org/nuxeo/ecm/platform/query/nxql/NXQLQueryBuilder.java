@@ -96,6 +96,14 @@ public class NXQLQueryBuilder {
 
     public static String getQuery(DocumentModel model, WhereClauseDefinition whereClause, Object[] params,
             SortInfo... sortInfos) {
+        return getQuery(model, whereClause, null, params, sortInfos);
+    }
+
+    /**
+     * @since 8.4
+     */
+    public static String getQuery(DocumentModel model, WhereClauseDefinition whereClause, String quickFiltersClause,
+            Object[] params, SortInfo... sortInfos) {
         StringBuilder queryBuilder = new StringBuilder();
         String selectStatement = whereClause.getSelectStatement();
         if (StringUtils.isBlank(selectStatement)) {
@@ -103,7 +111,7 @@ public class NXQLQueryBuilder {
         }
         queryBuilder.append(selectStatement);
         if (whereClause != null) {
-            queryBuilder.append(getQueryElement(model, whereClause, params));
+            queryBuilder.append(getQueryElement(model, whereClause, quickFiltersClause, params));
         }
         String sortClause = getSortClause(sortInfos);
         if (sortClause != null && sortClause.length() > 0) {
@@ -114,6 +122,14 @@ public class NXQLQueryBuilder {
     }
 
     public static String getQueryElement(DocumentModel model, WhereClauseDefinition whereClause, Object[] params) {
+        return getQueryElement(model, whereClause, null, params);
+    }
+
+    /**
+     * @since 8.4
+     */
+    public static String getQueryElement(DocumentModel model, WhereClauseDefinition whereClause,
+            String quickFiltersClause, Object[] params) {
         List<String> elements = new ArrayList<String>();
         PredicateDefinition[] predicates = whereClause.getPredicates();
         if (predicates != null) {
@@ -141,6 +157,9 @@ public class NXQLQueryBuilder {
         // add fixed part if applicable
         String fixedPart = whereClause.getFixedPart();
         if (!StringUtils.isBlank(fixedPart)) {
+            if (StringUtils.isNotBlank(quickFiltersClause)) {
+                fixedPart = appendClause(fixedPart, quickFiltersClause);
+            }
             if (elements.isEmpty()) {
                 elements.add(getQuery(fixedPart, params, whereClause.getQuoteFixedPartParameters(),
                         whereClause.getEscapeFixedPartParameters(), model));
@@ -148,6 +167,8 @@ public class NXQLQueryBuilder {
                 elements.add('(' + getQuery(fixedPart, params, whereClause.getQuoteFixedPartParameters(),
                         whereClause.getEscapeFixedPartParameters(), model) + ')');
             }
+        } else if (StringUtils.isNotBlank(quickFiltersClause)) {
+            fixedPart = quickFiltersClause;
         }
 
         if (elements.isEmpty()) {
