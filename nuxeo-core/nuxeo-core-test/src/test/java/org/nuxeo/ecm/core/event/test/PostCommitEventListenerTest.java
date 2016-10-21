@@ -83,7 +83,6 @@ public class PostCommitEventListenerTest {
     public void testScripts() throws Exception {
 //        harness.deployContrib("org.nuxeo.ecm.core.test.tests", "test-PostCommitListeners.xml");
 
-        // TODO: PostCommitEventListenerTest.testScripts:77 expected:<0> but was:<2>
         assertEquals(0, SCRIPT_CNT);
 
         EventContextImpl customContext = new EventContextImpl(null, null);
