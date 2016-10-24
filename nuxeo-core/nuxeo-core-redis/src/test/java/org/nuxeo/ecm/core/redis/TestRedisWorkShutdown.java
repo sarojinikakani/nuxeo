@@ -93,7 +93,6 @@ public class TestRedisWorkShutdown {
 
     @Test
     public void worksArePersisted() throws InterruptedException {
-
         int completed = works.getMetrics("default").getCompleted().intValue();
         assertMetrics(0, 0, completed, 0);
         try {
