@@ -87,7 +87,7 @@ public class TestRedisWorkShutdown {
     @Inject
     WorkManager works;
 
-    void assertMetrics(long scheduled, long running, long completed, long cancelled) {
+    private void assertMetrics(long scheduled, long running, long completed, long cancelled) {
         assertEquals(new WorkQueueMetrics("default", scheduled, running, completed, cancelled), works.getMetrics("default"));
     }
 
