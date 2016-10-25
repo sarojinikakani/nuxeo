@@ -156,7 +156,7 @@ public class RedisClusterInvalidator implements ClusterInvalidator {
     }
 
     protected void registerNode() {
-        final String startedDateTime = getCurrentDateTime();
+        startedDateTime = getCurrentDateTime();
         final List<String> keys = Arrays.asList(getNodeKey());
         final List<String> args = Arrays.asList(STARTED_FIELD, startedDateTime,
                 Integer.valueOf(TIMEOUT_REGISTER_SECOND).toString());
@@ -199,7 +199,6 @@ public class RedisClusterInvalidator implements ClusterInvalidator {
 
     @Override
     public void sendInvalidations(Invalidations invals) {
-        final String startedDateTime = getCurrentDateTime();
         RedisInvalidations rInvals = new RedisInvalidations(nodeId, invals);
         if (log.isTraceEnabled()) {
             log.trace("Sending invalidations: " + rInvals);
