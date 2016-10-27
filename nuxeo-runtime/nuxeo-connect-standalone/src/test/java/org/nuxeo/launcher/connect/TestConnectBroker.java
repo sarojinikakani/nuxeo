@@ -85,6 +85,7 @@ public class TestConnectBroker {
         public boolean accept(LoggingEvent event) {
             return event.getLevel().isGreaterOrEqual(Level.INFO) && (event.getLoggerName().contains("ConnectBroker")
                     || event.getLoggerName().contains("PackagePersistence")
+                    || event.getLoggerName().contains("PackageManagerImpl")
                     || event.getLoggerName().contains("LocalDownloadingPackage"));
         }
     }
@@ -197,6 +198,8 @@ public class TestConnectBroker {
         logCaptureResult.clear();
 
         connectBrocker.setRelax("true");
+        // restriction on target platform must be ignored and B-1.0.2 must be installed before A-1.2.0 because of
+        // optional dependencies
         assertThat(
                 connectBrocker.pkgRequest(null, Arrays.asList("A-1.2.0", "B-1.0.2"), null, null, true, false)).isTrue();
 
@@ -216,33 +219,36 @@ public class TestConnectBroker {
         assertEquals("Relax restriction to target platform server-8.3 because of package(s) B-1.0.2",
                 caughtEvents.get(0).getRenderedMessage());
         assertEquals(
-                "\nDependency resolution:\n" + "  Installation order (2):        A-1.2.0/B-1.0.2\n"
+                "\nDependency resolution:\n" + "  Installation order (2):        B-1.0.2/A-1.2.0\n"
                         + "  Unchanged packages (4):        hfA:1.0.0, C:1.0.0, D:1.0.2-SNAPSHOT, studioA:1.0.0\n"
                         + "  Packages to upgrade (2):       A:1.0.0, B:1.0.1-SNAPSHOT\n"
                         + "  Local packages to install (2): A:1.2.0, B:1.0.2\n",
                 caughtEvents.get(1).getRenderedMessage());
         assertEquals("Uninstalling B-1.0.1-SNAPSHOT", caughtEvents.get(2).getRenderedMessage());
         assertEquals("Uninstalling A-1.0.0", caughtEvents.get(3).getRenderedMessage());
-        assertEquals("Installing A-1.2.0", caughtEvents.get(4).getRenderedMessage());
-        assertEquals("Installing B-1.0.2", caughtEvents.get(5).getRenderedMessage());
+        assertEquals("Installing B-1.0.2", caughtEvents.get(4).getRenderedMessage());
+        assertEquals("Installing A-1.2.0", caughtEvents.get(5).getRenderedMessage());
+
         logCaptureResult.clear();
 
-        // SNAPSHOTS must be replaced in local cache before installation
-        assertThat(connectBrocker.pkgRequest(null, Arrays.asList("A-1.2.2-SNAPSHOT", "C-1.0.2-SNAPSHOT"), null, null,
-                true, false)).isTrue();
+        // SNAPSHOTS must be replaced in local cache before installation and D-1.0.4-SNAPSHOT must be installed after
+        // C-1.0.2-SNAPSHOT because of optional dependencies
+        assertThat(connectBrocker.pkgRequest(null,
+                Arrays.asList("A-1.2.2-SNAPSHOT", "C-1.0.2-SNAPSHOT", "D-1.0.4-SNAPSHOT"), null, null, true,
+                false)).isTrue();
 
         // After: [studioA-1.0.0, hfA-1.0.0, A-1.2.2-SNAPSHOT, B-1.0.2, C-1.0.2-SNAPSHOT, D-1.0.2-SNAPSHOT]
         checkPackagesState(connectBrocker, Arrays.asList("studioA-1.0.0", "hfA-1.0.0", "A-1.2.2-SNAPSHOT", "B-1.0.2",
-                "C-1.0.2-SNAPSHOT", "D-1.0.2-SNAPSHOT"), PackageState.STARTED);
+                "C-1.0.2-SNAPSHOT", "D-1.0.4-SNAPSHOT"), PackageState.STARTED);
         checkPackagesState(connectBrocker,
                 Arrays.asList("studioA-1.0.1", "studioA-1.0.2-SNAPSHOT", "hfB-1.0.0", "hfC-1.0.0-SNAPSHOT", "A-1.0.0",
                         "A-1.2.1-SNAPSHOT", "A-1.2.0", "A-1.2.2", "A-1.2.3-SNAPSHOT", "B-1.0.1-SNAPSHOT", "B-1.0.1",
-                        "C-1.0.1-SNAPSHOT", "C-1.0.0", "D-1.0.3-SNAPSHOT", "D-1.0.4-SNAPSHOT"),
+                        "C-1.0.1-SNAPSHOT", "C-1.0.0", "D-1.0.2-SNAPSHOT", "D-1.0.3-SNAPSHOT"),
                 PackageState.DOWNLOADED);
 
         // check logs
         caughtEvents = logCaptureResult.getCaughtEvents();
-        assertEquals(14, caughtEvents.size());
+        assertEquals(20, caughtEvents.size());
         assertEquals("Download of 'A-1.2.2-SNAPSHOT' will replace the one already in local cache.",
                 caughtEvents.get(0).getRenderedMessage());
         assertEquals("Downloading [A-1.2.2-SNAPSHOT]...", caughtEvents.get(1).getRenderedMessage());
@@ -253,19 +259,27 @@ public class TestConnectBroker {
         assertEquals("Downloading [C-1.0.2-SNAPSHOT]...", caughtEvents.get(5).getRenderedMessage());
         assertEquals("Replacement of C-1.0.2-SNAPSHOT in local cache...", caughtEvents.get(6).getRenderedMessage());
         assertEquals("Added C-1.0.2-SNAPSHOT", caughtEvents.get(7).getRenderedMessage());
-        assertEquals(
-                "Relax restriction to target platform server-8.3 because of package(s) A-1.2.2-SNAPSHOT, C-1.0.2-SNAPSHOT",
+        assertEquals("Download of 'D-1.0.4-SNAPSHOT' will replace the one already in local cache.",
                 caughtEvents.get(8).getRenderedMessage());
+        assertEquals("Downloading [D-1.0.4-SNAPSHOT]...", caughtEvents.get(9).getRenderedMessage());
+        assertEquals("Replacement of D-1.0.4-SNAPSHOT in local cache...", caughtEvents.get(10).getRenderedMessage());
+        assertEquals("Added D-1.0.4-SNAPSHOT", caughtEvents.get(11).getRenderedMessage());
         assertEquals(
-                "\nDependency resolution:\n" + "  Installation order (2):        A-1.2.2-SNAPSHOT/C-1.0.2-SNAPSHOT\n"
-                        + "  Unchanged packages (4):        B:1.0.2, hfA:1.0.0, D:1.0.2-SNAPSHOT, studioA:1.0.0\n"
-                        + "  Packages to upgrade (2):       A:1.2.0, C:1.0.0\n"
-                        + "  Local packages to install (2): A:1.2.2-SNAPSHOT, C:1.0.2-SNAPSHOT\n",
-                caughtEvents.get(9).getRenderedMessage());
-        assertEquals("Uninstalling C-1.0.0", caughtEvents.get(10).getRenderedMessage());
-        assertEquals("Uninstalling A-1.2.0", caughtEvents.get(11).getRenderedMessage());
-        assertEquals("Installing A-1.2.2-SNAPSHOT", caughtEvents.get(12).getRenderedMessage());
-        assertEquals("Installing C-1.0.2-SNAPSHOT", caughtEvents.get(13).getRenderedMessage());
+                "Relax restriction to target platform server-8.3 because of package(s) A-1.2.2-SNAPSHOT, C-1.0.2-SNAPSHOT, D-1.0.4-SNAPSHOT",
+                caughtEvents.get(12).getRenderedMessage());
+        assertEquals(
+                "\nDependency resolution:\n"
+                        + "  Installation order (3):        A-1.2.2-SNAPSHOT/D-1.0.4-SNAPSHOT/C-1.0.2-SNAPSHOT\n"
+                        + "  Unchanged packages (3):        B:1.0.2, hfA:1.0.0, studioA:1.0.0\n"
+                        + "  Packages to upgrade (3):       A:1.2.0, C:1.0.0, D:1.0.2-SNAPSHOT\n"
+                        + "  Local packages to install (3): A:1.2.2-SNAPSHOT, C:1.0.2-SNAPSHOT, D:1.0.4-SNAPSHOT\n",
+                caughtEvents.get(13).getRenderedMessage());
+        assertEquals("Uninstalling A-1.2.0", caughtEvents.get(14).getRenderedMessage());
+        assertEquals("Uninstalling C-1.0.0", caughtEvents.get(15).getRenderedMessage());
+        assertEquals("Uninstalling D-1.0.2-SNAPSHOT", caughtEvents.get(16).getRenderedMessage());
+        assertEquals("Installing A-1.2.2-SNAPSHOT", caughtEvents.get(17).getRenderedMessage());
+        assertEquals("Installing D-1.0.4-SNAPSHOT", caughtEvents.get(18).getRenderedMessage());
+        assertEquals("Installing C-1.0.2-SNAPSHOT", caughtEvents.get(19).getRenderedMessage());
     }
 
     @Test
@@ -508,6 +522,8 @@ public class TestConnectBroker {
                         "B-1.0.2", "C-1.0.1-SNAPSHOT", "C-1.0.2-SNAPSHOT", "D-1.0.3-SNAPSHOT", "D-1.0.4-SNAPSHOT"),
                 PackageState.DOWNLOADED);
 
+        // all installed packages must be upgraded to their last available release version and optional dependencies
+        // order must be respected
         assertThat(connectBrocker.pkgUpgrade()).isTrue();
 
         // After: [studioA-1.0.2-SNAPSHOT, hfA-1.0.8, A-1.2.2, B-1.0.2, C-1.0.0, D-1.0.4-SNAPSHOT]
@@ -561,6 +577,8 @@ public class TestConnectBroker {
                         "B-1.0.2", "C-1.0.1-SNAPSHOT", "C-1.0.2-SNAPSHOT", "D-1.0.3-SNAPSHOT", "D-1.0.4-SNAPSHOT"),
                 PackageState.DOWNLOADED);
 
+        // all installed packages must be upgraded to their last available snapshot version and optional dependencies
+        // order must be respected
         assertThat(connectBrocker.pkgUpgrade()).isTrue();
 
         // After: [studioA-1.0.2-SNAPSHOT, hfA-1.0.8, A-1.2.3-SNAPSHOT, B-1.0.2, C-1.0.2-SNAPSHOT, D-1.0.4-SNAPSHOT]
@@ -579,22 +597,22 @@ public class TestConnectBroker {
                 caughtEvents.get(0).getRenderedMessage());
         assertEquals(
                 "\nDependency resolution:\n"
-                        + "  Installation order (6):        A-1.2.3-SNAPSHOT/B-1.0.2/C-1.0.2-SNAPSHOT/D-1.0.4-SNAPSHOT/hfA-1.0.8/studioA-1.0.2-SNAPSHOT\n"
+                        + "  Installation order (6):        A-1.2.3-SNAPSHOT/B-1.0.2/D-1.0.4-SNAPSHOT/hfA-1.0.8/studioA-1.0.2-SNAPSHOT/C-1.0.2-SNAPSHOT\n"
                         + "  Packages to upgrade (6):       A:1.0.0, B:1.0.1-SNAPSHOT, hfA:1.0.0, C:1.0.0, D:1.0.2-SNAPSHOT, studioA:1.0.0\n"
                         + "  Local packages to install (6): A:1.2.3-SNAPSHOT, B:1.0.2, hfA:1.0.8, C:1.0.2-SNAPSHOT, D:1.0.4-SNAPSHOT, studioA:1.0.2-SNAPSHOT\n",
                 caughtEvents.get(1).getRenderedMessage());
-        assertEquals("Uninstalling studioA-1.0.0", caughtEvents.get(2).getRenderedMessage());
-        assertEquals("Uninstalling hfA-1.0.0", caughtEvents.get(3).getRenderedMessage());
-        assertEquals("Uninstalling D-1.0.2-SNAPSHOT", caughtEvents.get(4).getRenderedMessage());
-        assertEquals("Uninstalling C-1.0.0", caughtEvents.get(5).getRenderedMessage());
+        assertEquals("Uninstalling C-1.0.0", caughtEvents.get(2).getRenderedMessage());
+        assertEquals("Uninstalling studioA-1.0.0", caughtEvents.get(3).getRenderedMessage());
+        assertEquals("Uninstalling hfA-1.0.0", caughtEvents.get(4).getRenderedMessage());
+        assertEquals("Uninstalling D-1.0.2-SNAPSHOT", caughtEvents.get(5).getRenderedMessage());
         assertEquals("Uninstalling B-1.0.1-SNAPSHOT", caughtEvents.get(6).getRenderedMessage());
         assertEquals("Uninstalling A-1.0.0", caughtEvents.get(7).getRenderedMessage());
         assertEquals("Installing A-1.2.3-SNAPSHOT", caughtEvents.get(8).getRenderedMessage());
         assertEquals("Installing B-1.0.2", caughtEvents.get(9).getRenderedMessage());
-        assertEquals("Installing C-1.0.2-SNAPSHOT", caughtEvents.get(10).getRenderedMessage());
-        assertEquals("Installing D-1.0.4-SNAPSHOT", caughtEvents.get(11).getRenderedMessage());
-        assertEquals("Installing hfA-1.0.8", caughtEvents.get(12).getRenderedMessage());
-        assertEquals("Installing studioA-1.0.2-SNAPSHOT", caughtEvents.get(13).getRenderedMessage());
+        assertEquals("Installing D-1.0.4-SNAPSHOT", caughtEvents.get(10).getRenderedMessage());
+        assertEquals("Installing hfA-1.0.8", caughtEvents.get(11).getRenderedMessage());
+        assertEquals("Installing studioA-1.0.2-SNAPSHOT", caughtEvents.get(12).getRenderedMessage());
+        assertEquals("Installing C-1.0.2-SNAPSHOT", caughtEvents.get(13).getRenderedMessage());
     }
 
     @Test
@@ -615,6 +633,8 @@ public class TestConnectBroker {
                         "B-1.0.2", "C-1.0.1-SNAPSHOT", "C-1.0.2-SNAPSHOT", "D-1.0.3-SNAPSHOT", "D-1.0.4-SNAPSHOT"),
                 PackageState.DOWNLOADED);
 
+        // all installed packages must be upgraded to their last available release version on the current target
+        // platform and optional dependencies order must be respected
         assertThat(connectBrocker.pkgUpgrade()).isTrue();
 
         // After: [studioA-1.0.2-SNAPSHOT, hfA-1.0.8, A-1.2.0, B-1.0.1, C-1.0.0, D-1.0.3-SNAPSHOT]
@@ -629,24 +649,26 @@ public class TestConnectBroker {
 
         // check logs
         List<LoggingEvent> caughtEvents = logCaptureResult.getCaughtEvents();
-        assertEquals(11, caughtEvents.size());
+        assertEquals(12, caughtEvents.size());
+        assertEquals("Optional dependencies [B:1.0.2] will be ignored for [A-1.2.0].",
+                caughtEvents.get(0).getRenderedMessage());
         assertEquals(
                 "\nDependency resolution:\n"
-                        + "  Installation order (5):        A-1.2.0/B-1.0.1/D-1.0.3-SNAPSHOT/hfA-1.0.8/studioA-1.0.2-SNAPSHOT\n"
+                        + "  Installation order (5):        B-1.0.1/D-1.0.3-SNAPSHOT/hfA-1.0.8/studioA-1.0.2-SNAPSHOT/A-1.2.0\n"
                         + "  Unchanged packages (1):        C:1.0.0\n"
                         + "  Packages to upgrade (5):       A:1.0.0, B:1.0.1-SNAPSHOT, hfA:1.0.0, D:1.0.2-SNAPSHOT, studioA:1.0.0\n"
                         + "  Local packages to install (5): A:1.2.0, B:1.0.1, hfA:1.0.8, D:1.0.3-SNAPSHOT, studioA:1.0.2-SNAPSHOT\n",
-                caughtEvents.get(0).getRenderedMessage());
-        assertEquals("Uninstalling studioA-1.0.0", caughtEvents.get(1).getRenderedMessage());
-        assertEquals("Uninstalling hfA-1.0.0", caughtEvents.get(2).getRenderedMessage());
-        assertEquals("Uninstalling D-1.0.2-SNAPSHOT", caughtEvents.get(3).getRenderedMessage());
-        assertEquals("Uninstalling B-1.0.1-SNAPSHOT", caughtEvents.get(4).getRenderedMessage());
-        assertEquals("Uninstalling A-1.0.0", caughtEvents.get(5).getRenderedMessage());
-        assertEquals("Installing A-1.2.0", caughtEvents.get(6).getRenderedMessage());
+                caughtEvents.get(1).getRenderedMessage());
+        assertEquals("Uninstalling studioA-1.0.0", caughtEvents.get(2).getRenderedMessage());
+        assertEquals("Uninstalling hfA-1.0.0", caughtEvents.get(3).getRenderedMessage());
+        assertEquals("Uninstalling D-1.0.2-SNAPSHOT", caughtEvents.get(4).getRenderedMessage());
+        assertEquals("Uninstalling B-1.0.1-SNAPSHOT", caughtEvents.get(5).getRenderedMessage());
+        assertEquals("Uninstalling A-1.0.0", caughtEvents.get(6).getRenderedMessage());
         assertEquals("Installing B-1.0.1", caughtEvents.get(7).getRenderedMessage());
         assertEquals("Installing D-1.0.3-SNAPSHOT", caughtEvents.get(8).getRenderedMessage());
         assertEquals("Installing hfA-1.0.8", caughtEvents.get(9).getRenderedMessage());
         assertEquals("Installing studioA-1.0.2-SNAPSHOT", caughtEvents.get(10).getRenderedMessage());
+        assertEquals("Installing A-1.2.0", caughtEvents.get(11).getRenderedMessage());
     }
 
     @Test
@@ -667,6 +689,8 @@ public class TestConnectBroker {
                         "B-1.0.2", "C-1.0.1-SNAPSHOT", "C-1.0.2-SNAPSHOT", "D-1.0.3-SNAPSHOT", "D-1.0.4-SNAPSHOT"),
                 PackageState.DOWNLOADED);
 
+        // all installed packages must be upgraded to their last available snapshot version on the current target
+        // platform and optional dependencies order must be respected
         assertThat(connectBrocker.pkgUpgrade()).isTrue();
 
         // After: [studioA-1.0.2-SNAPSHOT, hfA-1.0.8, A-1.2.1-SNAPSHOT, B-1.0.1, C-1.0.1-SNAPSHOT, D-1.0.3-SNAPSHOT]
@@ -683,22 +707,22 @@ public class TestConnectBroker {
         assertEquals(13, caughtEvents.size());
         assertEquals(
                 "\nDependency resolution:\n"
-                        + "  Installation order (6):        A-1.2.1-SNAPSHOT/B-1.0.1/C-1.0.1-SNAPSHOT/D-1.0.3-SNAPSHOT/hfA-1.0.8/studioA-1.0.2-SNAPSHOT\n"
+                        + "  Installation order (6):        A-1.2.1-SNAPSHOT/B-1.0.1/D-1.0.3-SNAPSHOT/hfA-1.0.8/studioA-1.0.2-SNAPSHOT/C-1.0.1-SNAPSHOT\n"
                         + "  Packages to upgrade (6):       A:1.0.0, B:1.0.1-SNAPSHOT, hfA:1.0.0, C:1.0.0, D:1.0.2-SNAPSHOT, studioA:1.0.0\n"
                         + "  Local packages to install (6): A:1.2.1-SNAPSHOT, B:1.0.1, hfA:1.0.8, C:1.0.1-SNAPSHOT, D:1.0.3-SNAPSHOT, studioA:1.0.2-SNAPSHOT\n",
                 caughtEvents.get(0).getRenderedMessage());
-        assertEquals("Uninstalling studioA-1.0.0", caughtEvents.get(1).getRenderedMessage());
-        assertEquals("Uninstalling hfA-1.0.0", caughtEvents.get(2).getRenderedMessage());
-        assertEquals("Uninstalling D-1.0.2-SNAPSHOT", caughtEvents.get(3).getRenderedMessage());
-        assertEquals("Uninstalling C-1.0.0", caughtEvents.get(4).getRenderedMessage());
+        assertEquals("Uninstalling C-1.0.0", caughtEvents.get(1).getRenderedMessage());
+        assertEquals("Uninstalling studioA-1.0.0", caughtEvents.get(2).getRenderedMessage());
+        assertEquals("Uninstalling hfA-1.0.0", caughtEvents.get(3).getRenderedMessage());
+        assertEquals("Uninstalling D-1.0.2-SNAPSHOT", caughtEvents.get(4).getRenderedMessage());
         assertEquals("Uninstalling B-1.0.1-SNAPSHOT", caughtEvents.get(5).getRenderedMessage());
         assertEquals("Uninstalling A-1.0.0", caughtEvents.get(6).getRenderedMessage());
         assertEquals("Installing A-1.2.1-SNAPSHOT", caughtEvents.get(7).getRenderedMessage());
         assertEquals("Installing B-1.0.1", caughtEvents.get(8).getRenderedMessage());
-        assertEquals("Installing C-1.0.1-SNAPSHOT", caughtEvents.get(9).getRenderedMessage());
-        assertEquals("Installing D-1.0.3-SNAPSHOT", caughtEvents.get(10).getRenderedMessage());
-        assertEquals("Installing hfA-1.0.8", caughtEvents.get(11).getRenderedMessage());
-        assertEquals("Installing studioA-1.0.2-SNAPSHOT", caughtEvents.get(12).getRenderedMessage());
+        assertEquals("Installing D-1.0.3-SNAPSHOT", caughtEvents.get(9).getRenderedMessage());
+        assertEquals("Installing hfA-1.0.8", caughtEvents.get(10).getRenderedMessage());
+        assertEquals("Installing studioA-1.0.2-SNAPSHOT", caughtEvents.get(11).getRenderedMessage());
+        assertEquals("Installing C-1.0.1-SNAPSHOT", caughtEvents.get(12).getRenderedMessage());
     }
 
     @Test
