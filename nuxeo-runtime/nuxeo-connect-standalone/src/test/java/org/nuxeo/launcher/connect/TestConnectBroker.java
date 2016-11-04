@@ -402,6 +402,7 @@ public class TestConnectBroker {
         logCaptureResult.clear();
 
         // B-1.0.1-SNAPSHOT and D-1.0.2-SNAPSHOT must be uninstalled then reinstalled as they are SNAPSHOTS
+        // C-1.0.0 must be reinstalled as it has an optional dependency on D
         assertThat(connectBrocker.pkgRequest(null, Arrays.asList("B-1.0.1-SNAPSHOT", "D"), null, null, true,
                 false)).isTrue();
 
@@ -416,7 +417,7 @@ public class TestConnectBroker {
 
         // check logs
         caughtEvents = logCaptureResult.getCaughtEvents();
-        assertEquals(13, caughtEvents.size());
+        assertEquals(16, caughtEvents.size());
         assertEquals("Uninstalling B-1.0.1-SNAPSHOT", caughtEvents.get(0).getRenderedMessage());
         assertEquals("Download of 'B-1.0.1-SNAPSHOT' will replace the one already in local cache.",
                 caughtEvents.get(1).getRenderedMessage());
@@ -430,12 +431,18 @@ public class TestConnectBroker {
         assertEquals("Replacement of D-1.0.2-SNAPSHOT in local cache...", caughtEvents.get(8).getRenderedMessage());
         assertEquals("Added D-1.0.2-SNAPSHOT", caughtEvents.get(9).getRenderedMessage());
         assertEquals(
-                "\nDependency resolution:\n" + "  Installation order (2):        B-1.0.1-SNAPSHOT/D-1.0.2-SNAPSHOT\n"
-                        + "  Unchanged packages (4):        A:1.0.0, hfA:1.0.0, C:1.0.0, studioA:1.0.0\n"
-                        + "  Local packages to install (2): B:1.0.1-SNAPSHOT, D:1.0.2-SNAPSHOT\n",
+                "As package 'C-1.0.0' has an optional dependency on package 'D-1.0.2-SNAPSHOT' currently being installed, it will be reinstalled.",
                 caughtEvents.get(10).getRenderedMessage());
-        assertEquals("Installing B-1.0.1-SNAPSHOT", caughtEvents.get(11).getRenderedMessage());
-        assertEquals("Installing D-1.0.2-SNAPSHOT", caughtEvents.get(12).getRenderedMessage());
+        assertEquals("\nDependency resolution:\n"
+                + "  Installation order (3):        B-1.0.1-SNAPSHOT/D-1.0.2-SNAPSHOT/C-1.0.0\n"
+                + "  Uninstallation order (1):      C-1.0.0\n"
+                + "  Unchanged packages (3):        A:1.0.0, hfA:1.0.0, studioA:1.0.0\n"
+                + "  Local packages to install (3): B:1.0.1-SNAPSHOT, C:1.0.0, D:1.0.2-SNAPSHOT\n"
+                + "  Local packages to remove (1):  C:1.0.0\n", caughtEvents.get(11).getRenderedMessage());
+        assertEquals("Uninstalling C-1.0.0", caughtEvents.get(12).getRenderedMessage());
+        assertEquals("Installing B-1.0.1-SNAPSHOT", caughtEvents.get(13).getRenderedMessage());
+        assertEquals("Installing D-1.0.2-SNAPSHOT", caughtEvents.get(14).getRenderedMessage());
+        assertEquals("Installing C-1.0.0", caughtEvents.get(15).getRenderedMessage());
     }
 
     @Test
